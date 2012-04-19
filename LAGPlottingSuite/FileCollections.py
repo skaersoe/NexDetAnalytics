@@ -4,7 +4,7 @@
 FileCollections.py
 
 Created by Morten Dam Jørgensen on 2011-11-06.
-Copyright (c) 2011 Niels Bohr Institute. All rights reserved.
+Copyright (c) 2011 . All rights reserved.
 """
 
 import sys
@@ -12,6 +12,71 @@ import os
 from ROOT import *
 import re
 
+class HistCollection(object):
+    """Collection of histograms"""
+    def __init__(self, hist_array = []):
+        super(HistCollection, self).__init__()
+        self.hist_array = hist_array
+    
+    
+    
+    def merge(self, i=0, j=None):
+        """docstring for merge"""
+        if not j:
+            j = len(self.hist_array)-1
+        tmpHist = self.hist_array[i].th.Clone("new")
+        for h in self.hist_array[i+1:j]:
+            tmpHist.Add(h.th)
+        return Hist(tmpHist)
+    
+    
+    def draw(self, goption=""):
+        """docstring for draw"""
+        fout = self.merge()
+        fout.th.Draw(goption)
+        return fout.th
+    
+    
+    
+    ### Generic function overloading ####
+    def __add__(self, other):
+        """docstring for __add__"""
+        if type(other) == type(self):        
+            tmpHist = HistCollection()
+            tmpHist.hist_array = self.hist_array + other.hist_array
+            return tmpHist
+        else:
+            raise TypeError
+
+    def __getitem__(self, key):
+        """Return the file on key"""
+        return self.hist_array[key]
+
+    def __setitem__(self, key, item):
+        """docstring for __setitem__"""
+        if type(item) == type(self.hist_array[key]):
+            self.hist_array[key] = item
+        else:
+            raise TypeError
+
+    def __len__(self):
+        """docstring for __len__"""
+        return len(self.hist_array)
+
+    def __iter__(self):
+        """docstring for __iter__"""
+        return self.hist_array.__iter__()
+
+    def __str__(self):
+        """docstring for __str__"""
+        names = []
+        for f in self.hist_array:
+            names.append(f.th.GetName())
+
+        return "\n".join(names)
+
+    
+   
 
 class Hist(object):
     """docstring for Hist"""
@@ -28,6 +93,11 @@ class Hist(object):
         """docstring for parent"""
         return self.parent_file
         
+
+    def draw(self, goption=""):
+        """docstring for draw"""
+        self.th.Draw(goption)
+        return self.th
         
 class File(object):
     """A TFile object wrapper"""
@@ -63,7 +133,7 @@ class File(object):
             for k in key:
                 if self.fileobj.Get(k):
                     objs.append(Hist(self.fileobj.Get(k), self))
-            return objs
+            return HistCollection(objs)
         
         if self.fileobj.Get(key):
             return Hist(self.fileobj.Get(key), self)
@@ -77,10 +147,13 @@ class File(object):
 
 class FileCollection(object):
     """A collection of TFiles and methods to handle them"""
-    def __init__(self):
+    def __init__(self, path = None, nameMatch="(.*).root"):
         super(FileCollection, self).__init__()
         self.tfileobjs = []
         self.verbose = False
+        if path:
+            self.import_from_directory(path=path, nameMatch=nameMatch)
+        
     
     def import_from_directory(self, path = ".", nameMatch="(.*).root"):
         """Import all root files from a directory matching the regular expression nameMatch"""
@@ -92,25 +165,58 @@ class FileCollection(object):
                 if self.verbose: print "Importing %s" % fname
                 self.tfileobjs.append(File(TFile("/".join([path,fname]),"read"), self))
                 
-                
-    def import_file(self, filepath):
-        """Add a specific file to the File collection"""
-        self.tfileobjs.append(File(TFile(filepath,"read"), self))
-        
+                        
     def files(self, fid = -1):
         """Return the File objects"""
         if fid >= 0: 
             return self.tfileobjs[fid]
         else: 
             return self.tfileobjs
-            
+        
     def get(self, key):
         """docstring for get"""
         tobjects = []
         for f in self.tfileobjs:
             tobjects.append(f.get(key))
         
-        return tobjects
+        return HistCollection(tobjects)
+        
+    def append(self, f):
+        """Append new file"""
+        self.tfileobjs.append(f)
+    
+    def append_file(self, filepath):
+        """Add a specific file to the File collection"""
+        self.append(File(TFile(filepath,"read"), self))
+        
+    def __add__(self, other):
+        """docstring for __add__"""
+        if type(other) == type(self):        
+            tmpFilecollection = FileCollection()
+            tmpFilecollection.verbose = self.verbose
+            tmpFilecollection.tfileobjs = self.tfileobjs + other.tfileobjs
+            return tmpFilecollection
+        else:
+            raise TypeError
+            
+    def __getitem__(self, key):
+        """Return the file on key"""
+        return self.tfileobjs[key]
+    
+    def __setitem__(self, key, item):
+        """docstring for __setitem__"""
+        if type(item) == type(self.tfileobjs[key]):
+            self.tfileobjs[key] = item
+        else:
+            raise TypeError
+            
+    def __len__(self):
+        """docstring for __len__"""
+        return len(self.tfileobjs)
+        
+    def __iter__(self):
+        """docstring for __iter__"""
+        return self.tfileobjs.__iter__()
         
     def __str__(self):
         """docstring for __str__"""
@@ -120,5 +226,4 @@ class FileCollection(object):
         
         return "\n".join(names)
     
-        
         

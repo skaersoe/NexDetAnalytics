@@ -17,7 +17,13 @@
 
 """
 from ROOT import *
+
+# Only needed if LAGPlottingSuite is not in the python path already
+import sys
+sys.path.append("../")
+
 from LAGPlottingSuite.FileCollections import FileCollection
+
 
 # Collect input files
 filepath="/Users/mdj/Data/Selection"
@@ -48,10 +54,6 @@ data = {
     "data.periodIJK_physics_JetTauEtmiss_SUSYLLP_RPVLL"     : FileCollection(path=filepath, nameMatch="Selection.data.periodIJK_physics_JetTauEtmiss_SUSYLLP_RPVLL.root"),
     "data.periodLM_physics_JetTauEtmiss_SUSYLLP_RPVLL"      : FileCollection(path=filepath, nameMatch="Selection.data.periodLM_physics_JetTauEtmiss_SUSYLLP_RPVLL.root")
 }
-
-# Find files
-# filepath="/Users/mdj/Data/SMPcycle_Selection"
-
 
 
 for key in signals.iterkeys():
