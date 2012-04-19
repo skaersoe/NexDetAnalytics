@@ -4,7 +4,7 @@
 FileCollections.py
 
 Created by Morten Dam Jørgensen on 2011-11-06.
-Copyright (c) 2011 . All rights reserved.
+Copyright (c) 2011 Niels Bohr Institute. All rights reserved.
 """
 
 import sys
