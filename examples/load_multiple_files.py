@@ -75,7 +75,7 @@ print data["data.periodD_physics_JetTauEtmiss_SUSYLLP_RPVLL"][0].keys()
 # for i in signals["R-Hadron_gener_gluino_0p1"]:
     # print i
 
-# Draw  the "masspass" histogram for the first mass hypothesis in the R-Hadron_gener_gluino_0p1 collection
+# Draw  the "masspass" histogram for the fifth mass hypothesis in the R-Hadron_gener_gluino_0p1 collection
 sig = signals["R-Hadron_gener_gluino_0p1"][4].get("masspass").draw("HIST") # draw() returns the ROOT::TH* object to allow for easy manipulation
 sig.SetFillColor(kRed) # Colour it red.
 
