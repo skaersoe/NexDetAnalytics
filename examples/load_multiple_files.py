@@ -56,24 +56,28 @@ data = {
 }
 
 
+# List the number of files in each signal collection
 for key in signals.iterkeys():
     print "%s contains: %d files" % (key, len(signals[key]))
-    
+
+# List the number of files in each background collection    
 for key in backgrounds.iterkeys():
     print "%s contains: %d files" % (key, len(backgrounds[key]))
     
+# List the number of files in each data collection
 for key in data.iterkeys():
     print "%s contains: %d files" % (key, len(data[key]))
-#     
-    
+
+
+# Print all histograms in the first file in the data.periodD_physics_JetTauEtmiss_SUSYLLP_RPVLL file
 print data["data.periodD_physics_JetTauEtmiss_SUSYLLP_RPVLL"][0].keys()
 
 # for i in signals["R-Hadron_gener_gluino_0p1"]:
     # print i
 
-
-sig = signals["R-Hadron_gener_gluino_0p1"][4].get("masspass").draw("HIST")
-sig.SetFillColor(kRed)
+# Draw  the "masspass" histogram for the first mass hypothesis in the R-Hadron_gener_gluino_0p1 collection
+sig = signals["R-Hadron_gener_gluino_0p1"][4].get("masspass").draw("HIST") # draw() returns the ROOT::TH* object to allow for easy manipulation
+sig.SetFillColor(kRed) # Colour it red.
 
 allbg = backgrounds["BackgroundEstimator.data.periodD"] + backgrounds["BackgroundEstimator.data.periodEFGH"] + backgrounds["BackgroundEstimator.data.periodIJK"] + backgrounds["BackgroundEstimator.data.periodLM"]
 bg = allbg.get("masspass").draw("SAME HIST")
@@ -83,15 +87,5 @@ alldata = data["data.periodD_physics_JetTauEtmiss_SUSYLLP_RPVLL"] + data["data.p
 dat = alldata.get("masspass").draw("SAME")
 
 
-
-# data3 = data["data.periodD_physics_JetTauEtmiss_SUSYLLP_RPVLL"] + data["data.periodEFGH_physics_JetTauEtmiss_SUSYLLP_RPVLL"] + data["data.periodIJK_physics_JetTauEtmiss_SUSYLLP_RPVLL"] 
-# b =  data3.get("cutflow_2").draw("HIST same")
-# 
-# data4 = data["data.periodD_physics_JetTauEtmiss_SUSYLLP_RPVLL"] + data["data.periodEFGH_physics_JetTauEtmiss_SUSYLLP_RPVLL"] 
-# c =  data4.get("cutflow_2").draw("HIST same")
-# 
-# data5 = data["data.periodD_physics_JetTauEtmiss_SUSYLLP_RPVLL"] 
-# d =  data5.get("cutflow_2").draw("HIST same")
-
  
-raw_input("Done.. ")
+raw_input("Done.. ") # Due to garbage collection, the histograms will be deleted if the script is allowed to return
