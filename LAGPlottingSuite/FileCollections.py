@@ -11,29 +11,32 @@ import sys
 import os
 from ROOT import *
 import re
+import Plotting
+
+color = Plotting.new_color() # new color iterator
 
 class HistCollection(object):
     """Collection of histograms"""
     def __init__(self, hist_array = []):
         super(HistCollection, self).__init__()
         self.hist_array = hist_array
-    
+
     
     
     def merge(self, i=0, j=None):
         """docstring for merge"""
         if not j:
             j = len(self.hist_array)-1
-        tmpHist = self.hist_array[i].th.Clone("new")
+        tmpHist = self.hist_array[i].th.Clone("new_%s" % self.hist_array[i].th.GetName())
         for h in self.hist_array[i+1:j]:
             tmpHist.Add(h.th)
         return Hist(tmpHist)
     
     
-    def draw(self, goption=""):
+    def draw(self, goption="", color=None):
         """docstring for draw"""
         fout = self.merge()
-        fout.th.Draw(goption)
+        fout.draw(goption, color)        
         return fout.th
     
     
@@ -84,7 +87,8 @@ class Hist(object):
         super(Hist, self).__init__()
         self.th = th
         self.parent_file = parent
-        
+        self.color = color.next()
+
     def hist(self):
         """docstring for hist"""
         return self.th
@@ -94,9 +98,15 @@ class Hist(object):
         return self.parent_file
         
 
-    def draw(self, goption=""):
+    def draw(self, goption="", color=None):
         """docstring for draw"""
         self.th.Draw(goption)
+        if color:
+            self.color = color
+            
+        self.th.SetLineColor(self.color)
+        # fout.th.SetFillColor(c)
+        
         return self.th
         
 class File(object):
@@ -226,4 +236,5 @@ class FileCollection(object):
         
         return "\n".join(names)
     
+        
         

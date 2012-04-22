@@ -23,6 +23,10 @@ import sys
 sys.path.append("../")
 
 from LAGPlottingSuite.FileCollections import FileCollection
+from LAGPlottingSuite.Plotting import Canvas, LAGStyle
+
+# gROOT.SetBatch(True)
+style = LAGStyle()
 
 
 # Collect input files
@@ -87,5 +91,30 @@ alldata = data["data.periodD_physics_JetTauEtmiss_SUSYLLP_RPVLL"] + data["data.p
 dat = alldata.get("masspass").draw("SAME")
 
 
- 
+#### 
+
+
+# Find files
+filepath="/Users/mdj/Data/BkgPreSelectionProfiles"
+
+backgrounds_profiles = {
+    "BackgroundEstimatorProfiles.data.periodD"      : FileCollection(path=filepath, nameMatch="BackgroundEstimatorProfiles.data.periodD_physics_JetTauEtmiss_SUSYLLP_RPVLL.root"),
+    "BackgroundEstimatorProfiles.data.periodEFGH"   : FileCollection(path=filepath, nameMatch="BackgroundEstimatorProfiles.data.periodEFGH_physics_JetTauEtmiss_SUSYLLP_RPVLL.root"),
+    "BackgroundEstimatorProfiles.data.periodIJK"    : FileCollection(path=filepath, nameMatch="BackgroundEstimatorProfiles.data.periodIJK_physics_JetTauEtmiss_SUSYLLP_RPVLL.root"),
+    "BackgroundEstimatorProfiles.data.periodLM"     : FileCollection(path=filepath, nameMatch="BackgroundEstimatorProfiles.data.periodLM_physics_JetTauEtmiss_SUSYLLP_RPVLL.root")
+}
+
+
+
+# Use the fancy Canvas class to draw multiple histograms in one go, with legend and colors
+p_var = [30, 60, 80, 100, 120, 140, 150, 200, 400, 600, 800, 1000]
+can = Canvas("Test", "#beta#gamma for various momentum ranges", goption="HIST")
+for p in p_var:
+    a = backgrounds_profiles["BackgroundEstimatorProfiles.data.periodEFGH"].get("bg_p_lt_%2.2f_c1" % p).merge()
+    a.th.Scale(1/a.th.Integral())
+    can.draw(a)
+can.xlabel("#beta#gamma")
+can.ylabel("entries")
+can.logy()
+
 raw_input("Done.. ") # Due to garbage collection, the histograms will be deleted if the script is allowed to return
