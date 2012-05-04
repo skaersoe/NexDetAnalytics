@@ -136,16 +136,28 @@ class File(object):
         """docstring for entries"""
         return self.fileobj.Get(ttree).GetEntries()
         
+        
+    def get_ttree(self, key):
+        """ return TTree """
+        if isinstance(self.fileobj.Get(key),TTree): # in case of a TTree just return the raw object
+            return self.fileobj.Get(key)
+        else:
+            raise TypeError
+            
     def get(self, key):
         """docstring for get"""
         if isinstance(key, list):
             objs = []
             for k in key:
                 if self.fileobj.Get(k):
+                    # print self.fileobj.Get(k)
                     objs.append(Hist(self.fileobj.Get(k), self))
             return HistCollection(objs)
         
         if self.fileobj.Get(key):
+            if isinstance(self.fileobj.Get(key),TTree): # in case of a TTree just return the raw object
+                return self.fileobj.Get(key)
+                
             return Hist(self.fileobj.Get(key), self)
             
         return None
@@ -160,6 +172,7 @@ class FileCollection(object):
     def __init__(self, path = None, nameMatch="(.*).root"):
         super(FileCollection, self).__init__()
         self.tfileobjs = []
+        self.tfilepaths = []
         self.verbose = False
         if path:
             self.import_from_directory(path=path, nameMatch=nameMatch)
@@ -174,18 +187,35 @@ class FileCollection(object):
             if re.match(nameMatch, fname):
                 if self.verbose: print "Importing %s" % fname
                 self.tfileobjs.append(File(TFile("/".join([path,fname]),"read"), self))
+                self.tfilepaths.append("/".join([path,fname]))
                 
-                        
     def files(self, fid = -1):
         """Return the File objects"""
         if fid >= 0: 
             return self.tfileobjs[fid]
         else: 
             return self.tfileobjs
-        
+
+    def get_ttree(self, key):
+        """docstring for get_ttree"""
+        if isinstance(self.tfileobjs[0].get(key), TTree):
+            print" this is a TTree"
+            self.tchain = TChain(key)
+            for fp in self.tfilepaths:
+                self.tchain.AddFile(fp)
+            return self.tchain
+        else:
+            raise TypeError
+            
     def get(self, key):
         """docstring for get"""
         tobjects = []
+        
+        # TTree are handled a bit different
+        # If the variable is a TTree, we create a chain and return that
+        if isinstance(self.tfileobjs[0].get(key), TTree):
+            return self.get_ttree(key)
+        
         for f in self.tfileobjs:
             tobjects.append(f.get(key))
         
