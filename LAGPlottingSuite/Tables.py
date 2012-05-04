@@ -28,6 +28,8 @@ htmltemplate = r'''
 '''
 import unittest
 import array
+import operator
+
 class Table(object):
     """A 2D table that allows for keyed inputs on both axes"""
     def __init__(self, title, caption="Table Instance"):
@@ -90,15 +92,27 @@ class CutflowTable(object):
         self.default_list = dict()
         self.title = title
         self.caption = caption
+        self.cuts = []
+        self.samples = []
         
 
     def add(self, cut, data, value):
         """docstring for add"""
+        
+        if not cut in self.cuts:
+            self.cuts.append(cut)
+        
+        if not data in self.samples:
+            self.samples.append(data)
+        
+        
+        
         if self.default_list.has_key(cut):
             if self.default_list[cut].has_key(data):
                 self.default_list[cut][data] = value
             else:
                 self.default_list[cut][data] = value
+                
         else:
             self.default_list[cut] = {data:value}
     
@@ -106,14 +120,25 @@ class CutflowTable(object):
         """docstring for __str__"""
         string = ""
         k = 0
-        for i in self.default_list.iterkeys():
+
+        for i in self.cuts:
             k += 1
-            if k == 1: string+= "\t"+"\t ".join((m for m in self.default_list[i].iterkeys())) + "\n"
-            string+= "%s\t"%i+ "\t ".join((str(self.default_list[i][m]) for m in self.default_list[i].iterkeys())) + "\n"
+            if k == 1: string+= len(self.samples[k])*" " + "|"+"|\t".join((m for m in self.samples)) + "\n"
+            
+            string+= "%s |"%i
+            
+            for m in self.samples:
+                try:
+                    string += "\t%s|" % self.default_list[i][m]
+                except:
+                    string += "\t|" 
+            string += '\n'
+
         
-        string += "\nTable caption: %s\n" % self.caption
+        string += "\n\tTable caption: %s\n" % self.caption
+        
         return string
-    
+            
     def tex_ref(self):
         """docstring for tex_ref"""
         return r"tbl:%s" % self.title.replace(" ", "_").replace("$","")
@@ -123,15 +148,24 @@ class CutflowTable(object):
         string = ""
         length = 0
         k = 0
-        for i in self.default_list.iterkeys():
+        for i in self.cuts:
             k += 1
-            
-            samp = self.default_list[i].keys()                
-            # sorted(samp)
             if k == 1: 
-                string+= "\t& "+"\t & ".join((m for m in samp)) + r" \\ \hline" + "\n"
-                length = len(self.default_list[i])
-            string+= "%s\t& "%i+ "\t & ".join(("$"+str(self.default_list[i][m])+"$" for m in samp)) + " \\\\ \n"
+                string+= "\t& "+"\t & ".join((m for m in self.samples)) + r" \\ \hline" + "\n"
+            
+            
+            length = len(self.samples)
+            
+            string+= "%s\t" % i
+            for m in self.samples:
+                try:
+                    string += "\t & %s" % self.default_list[i][m]
+                except:
+                    string += "\t  &" 
+            string +=  r"\\" + "\n"
+                
+                
+            # string+= "%s\t& "%i+ "\t & ".join(("$"+str(self.default_list[i][m])+"$" for m in self.samples)) + " \\\\ \n"
 
         return latextemplate % (min(1,length*0.3), length * "c", string, self.caption, self.tex_ref())
         
@@ -144,24 +178,28 @@ class CutflowTable(object):
         string_hdr = ""
         length = 0
         k = 0
-        for i in self.default_list.iterkeys():
+
+
+        for i in self.cuts:
             k += 1
             
             samp = self.default_list[i].keys()                
-            # sorted(samp)
+            # sorted(samp, key=lambda x: )
+            
             if k == 1: 
-                string_hdr+= "<td></td>"+" ".join(('<td>'+str(m)+'</td>' for m in samp))
+                string_hdr+= "<td></td>"+" ".join(('<td>'+str(m)+'</td>' for m in self.samples)) + "\n"
             # string+= "%s\t& "%i+ "\t & ".join(("$"+str(self.default_list[i][m])+"$" for m in samp)) + " \\\\ \n"
             
             
             
-            string+= "<tr><td>%s</td>" % i 
-            for m in samp:
+            string+= "<tr>\n<td>%s</td>" % i 
+
+            for m in self.samples:
                 # if self.default_list[i][m] is float:
                 try:
-                    string += "<td class='float'>%2.2f</td>" % float(self.default_list[i][m])
-                except ValueError:
-                    string += "<td class='str'>%s</td>" % self.default_list[i][m]
+                    string += "<td class='float'>%2.2f</td>" % self.default_list[i][m]  + "\n"
+                except:
+                    string += "<td class='empty'>-</td>"+ "\n"
             
             # +" ".join(('<td>'+str(self.default_list[i][m])+'</td>' for m in samp)) + "</tr>"
             string += "</tr>"
@@ -189,29 +227,31 @@ assertNotIsInstance(a, b)	not isinstance(a, b)	2.7
 
 class TableTests(unittest.TestCase):
     def setUp(self):
-        self.table = Table("test table", "A testing table")
+        self.table = CutflowTable("test table", "A testing table")
     
     def runTest(self):
         """docstring for runTest"""
-        self.table["cut1","case1"] = "meh"
-        # print self.table["cut1", "case1"]
+        self.table.add("cut1","case1", "meh" )
+        self.table.add("cut1","case2", 4     )
+        self.table.add("cut1","case3", 3     )
+        self.table.add("cut1","case4", 8     )
         
-        self.table["cut1","case2"] = 4
-        
-        self.table["cut1","case3"] = 6
-        
-        self.table["cut1","case4"] = 8
-        self.table["cut2","case0"] = -4
-        self.table["cut2","case1"] = -8
-        self.table["cut2","case2"] = -16
-        self.table["cut2","case3"] = -32
-        self.table["cut2","case2"] = 42
+        self.table.add("cut2","case0", -4    )
+        self.table.add("cut2","case1", -8    )
+        self.table.add("cut2","case2", -16   )
+        self.table.add("cut2","case3", -32   )
+        self.table.add("cut2","case2", 42    )
+        self.table.add("cut3","case1", -8    )
+        self.table.add("cut3","case2", -16   )
 
 
         # self.assertTrue(self.table['cut2', 'case2'] == 42)
 
         print self.table
 
+
+        print self.table.latex( "", "", format="pdf")
+        print self.table.html( "", "", format="pdf")
 
         
         

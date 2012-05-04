@@ -270,8 +270,24 @@ table td {
 	background-color: white;
 	-moz-border-radius: ;
 }
+.caption {
+font-style: italic;
+text-align: center;
+}
 body {
     margin: 20px;
+}
+
+h1 {
+ font-size: 300%;
+ margin: 15px;
+}
+h2  { 
+margin: 10px;
+font-size: 200%}
+h3 {
+margin: 10px;
+font-size: 150%;
 }
 </style>
 
@@ -299,7 +315,7 @@ MathJax.Hub.Config({
             out.write(r'''</div></body></html>''')
 
 
-        print Colors.Blue +"\nLaTeX Report: %s"  % output_folder + "%s.html" % self.title + Colors.Color_Off
+        print Colors.Blue +"\nHTML Report: %s"  % output_folder + "%s.html" % self.title + Colors.Color_Off
         
     def generate_text(self):
         """docstring for generate_plain_text"""
