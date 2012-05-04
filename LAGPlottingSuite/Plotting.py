@@ -125,7 +125,7 @@ class Canvas(object):
         """docstring for add"""
         self.cd(n)
         hist.draw(self.goption + goption, color=self.color.next())
-        self.tlegend.AddEntry(hist.th, hist.th.GetTitle(), "l")
+        self.tlegend.AddEntry(hist.th, hist.title())#, "l")
         self.content.append(hist)
         
         if len(self.content) == 1: # stack

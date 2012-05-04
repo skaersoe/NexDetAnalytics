@@ -88,7 +88,13 @@ class Hist(object):
         self.th = th
         self.parent_file = parent
         self.color = color.next()
-
+        
+    def title(self, _title=None):
+        """docstring for title"""
+        if _title:
+            self.th.SetTitle(_title)
+            
+        return self.th.GetTitle()
     def hist(self):
         """docstring for hist"""
         return self.th
@@ -197,9 +203,10 @@ class FileCollection(object):
             return self.tfileobjs
 
     def get_ttree(self, key):
-        """docstring for get_ttree"""
+        """docstring for get_ttree
+            Returns a TChain
+        """
         if isinstance(self.tfileobjs[0].get(key), TTree):
-            print" this is a TTree"
             self.tchain = TChain(key)
             for fp in self.tfilepaths:
                 self.tchain.AddFile(fp)
