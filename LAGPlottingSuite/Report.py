@@ -105,7 +105,7 @@ class Colors:
 
 class Report(object):
     """docstring for Report"""
-    def __init__(self, title=u"An example report", author=u"Morten Dam Joergensen", rdate=datetime.date.today(), path=None):
+    def __init__(self, title=u"An example report", author=u"Morten Dam Joergensen", rdate=datetime.date.today(), path=os.getcwd()):
         super(Report, self).__init__()
         self.title = title
         self.author = author
@@ -127,9 +127,9 @@ class Report(object):
         
         
     # Add new content
-    def section(self, title = "a new section"):
+    def section(self, title = "a new section", new_page=False):
         """docstring for new_section"""
-        section = Section(title)
+        section = Section(title,new_page)
         self.sections.append(section)
         return section
         
@@ -148,7 +148,7 @@ class Report(object):
         if not os.path.exists(d):
             os.makedirs(d)
         
-        filename = output_folder + "%s.tex" % self.title
+        filename = output_folder + "%s.tex" % self.title.replace(" ", "_")
         # Generate output
         with open(filename, "w") as out:
             preample = r'''
@@ -182,6 +182,8 @@ class Report(object):
 \maketitle
             ''')
             for part in self.sections:
+                if part.new_page:
+                    out.write(r"\newpage")
                 out.write(r"%s" % part.latex(output_folder, output_folder_img))
         
         
@@ -204,7 +206,7 @@ class Report(object):
         # # Remove LaTex debris
         retcode = os.system("rm *.aux *.log *.toc *.out *.fdb_latexmk")
 
-        print Colors.Blue +"\nLaTeX Report: %s"  % output_folder + "%s.pdf" % self.title + Colors.Color_Off
+        print Colors.Blue +"\nLaTeX Report: %s"  % output_folder + "%s.pdf" % self.title.replace(" ", "_") + Colors.Color_Off
     
     def generate_html(self):
         """docstring for generate_html"""
@@ -215,7 +217,7 @@ class Report(object):
         if not os.path.exists(d):
             os.makedirs(d)
 
-        filename = output_folder + "%s.html" % self.title
+        filename = output_folder + "%s.html" % self.title.replace(" ", "_")
         # Generate output
         with open(filename, "w") as out:
             preample = r'''
@@ -315,7 +317,7 @@ MathJax.Hub.Config({
             out.write(r'''</div></body></html>''')
 
 
-        print Colors.Blue +"\nHTML Report: %s"  % output_folder + "%s.html" % self.title + Colors.Color_Off
+        print Colors.Blue +"\nHTML Report: %s"  % output_folder + "%s.html" % self.title.replace(" ", "_") + Colors.Color_Off
         
     def generate_text(self):
         """docstring for generate_plain_text"""
@@ -328,7 +330,7 @@ MathJax.Hub.Config({
             os.makedirs(d)
             
         # Generate output
-        with open(output_folder + "%s.txt" % self.title, "w") as out:
+        with open(output_folder + "%s.txt" % self.title.replace(" ", "_"), "w") as out:
             out.write(self.title + "\n")
             out.write(str(self.date) + "\n")
             out.write(self.author + "\n")
@@ -337,7 +339,7 @@ MathJax.Hub.Config({
                 out.write("\n%s" % part.plain_text(output_folder, output_folder_img))
 
             
-        print Colors.Blue +"Text report: %s"  % output_folder + "%s.txt" % self.title + Colors.Color_Off
+        print Colors.Blue +"Text report: %s"  % output_folder + "%s.txt" % self.title.replace(" ", "_") + Colors.Color_Off
         
         
     def generate_doc(self):
@@ -389,10 +391,11 @@ class Equation(Text):
         
 class Section(object):
     """A report section"""
-    def __init__(self, title="A section"):
+    def __init__(self, title="A section", new_page=False):
         super(Section, self).__init__()
         self.title = title
         self.parts = []
+        self.new_page = new_page
 
     def tex_ref(self):
         """docstring for tex_ref"""

@@ -27,6 +27,7 @@ class Canvas(object):
         
         self.content = []
         self.goption = goption
+        self.tstack = THStack()
         
         self.color = new_color() # Color iterator
         
@@ -45,12 +46,11 @@ class Canvas(object):
         else:
             self.tcanvas.cd()
     
-    def drawAsStack(self):
+    def stack(self):
         """docstring for drawAsStack"""
-        stack = THStack() # FIXME
-        for c in self.content:
-            stack.Add(c.th)
-        return stack.Draw("nostack")
+        self.tcanvas.cd(0)
+        self.tstack.Draw("nostack")
+        
         
     def logx(self):
         """docstring for logx"""
@@ -103,14 +103,24 @@ class Canvas(object):
         
     def resize(self):
         """docstring for resize"""
-
-        max_y = self.content[0].th.GetMaximum()
-        min_y = self.content[0].th.GetBinContent(self.content[0].th.GetMinimumBin())
+        if not isinstance(self.content[0].th, TH2):
+            max_y = self.content[0].th.GetMaximum()
+            min_y = self.content[0].th.GetBinContent(self.content[0].th.GetMinimumBin())
+        elif isinstance(self.content[0].th, TGraph) or isinstance(self.content[0].th, TCutG):
+            minx = Double()
+            miny = Double()
+            maxx = Double()
+            maxy = Double()
+            self.content[0].th.ComputeRange(minx, miny, maxx, maxy) # Get the ranges, transfer the, to a histogram if it is the first object on stack
+            max_y = maxy
+            min_y = miny
+            
+        else:
+            max_y = self.content[0].th.GetYaxis().GetXmax()            
+            min_y = self.content[0].th.GetYaxis().GetXmin()
+            
         for c in self.content:
-            if not isinstance(c.th, TGraph) and not isinstance(c.th, TCutG):
-                max_y = max(c.th.GetMaximum(), max_y)
-                min_y = min(c.th.GetBinContent(c.th.GetMinimumBin()), min_y)                
-            else:
+            if isinstance(c.th, TGraph) or isinstance(c.th, TCutG):
                 minx = Double()
                 miny = Double()
                 maxx = Double()
@@ -118,6 +128,13 @@ class Canvas(object):
                 c.th.ComputeRange(minx, miny, maxx, maxy) # Get the ranges, transfer the, to a histogram if it is the first object on stack
                 max_y = max(maxy, max_y)
                 min_y = min(miny, min_y)
+                
+            elif isinstance(c.th, TH2):
+                max_y = max(c.th.GetYaxis().GetXmax(), max_y)             
+                min_y = min(c.th.GetYaxis().GetXmin(), min_y)
+            else:
+                max_y = max(c.th.GetMaximum(), max_y)
+                min_y = min(c.th.GetBinContent(c.th.GetMinimumBin()), min_y)
                 
                 
 
@@ -136,9 +153,10 @@ class Canvas(object):
         # Todo fix with a sanitiser path that returns a variable to be used in the generator methods
         self.tcanvas.SaveAs(path)
         
-    def add(self, hist, goption ="", canvas_n=None, normalize=False, leg_option="l"):
+    def add(self, hist, goption ="", canvas_n=0, normalize=False, leg_option="l"):
         """docstring for add"""
         self.cd(canvas_n)
+        
         if isinstance(hist.th, TGraph) or isinstance(hist.th, TCutG):
             xmin = Double()
             ymin = Double()
@@ -164,6 +182,8 @@ class Canvas(object):
         if len(self.content) == 1: # stack
             self.goption += "SAME"
             
+        self.tstack.Add(hist.th, goption)
+            
         self.update()
         
     def draw(self, *args):
@@ -181,9 +201,9 @@ class Canvas(object):
         
     def plain_text(self, output_folder, output_folder_img, format="png"):
         """docstring for fname"""
-        filepath = output_folder_img + self.title.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        filepath = output_folder_img + self.name.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + ".%s" % format
         self.save(filepath)
-        relative_dir = output_folder_img.replace(output_folder, "")  + self.title.replace(" ","_").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        relative_dir = output_folder_img.replace(output_folder, "")  + self.name.replace(" ","_").replace("#", "").replace("(","").replace(")","") + ".%s" % format
         
         return "figure: %s (%s)" % (self.title, relative_dir)
 
@@ -193,9 +213,9 @@ class Canvas(object):
         
     def latex(self, output_folder, output_folder_img, format="pdf"):
         """docstring for latex"""
-        filepath = output_folder_img + self.title.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        filepath = output_folder_img + self.name.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + ".%s" % format
         self.save(filepath)
-        relative_dir = output_folder_img.replace(output_folder, "")  + self.title.replace(" ","_").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        relative_dir = output_folder_img.replace(output_folder, "")  + self.name.replace(" ","_").replace("#", "").replace("(","").replace(")","") + ".%s" % format
         output = r'''
 \begin{figure}[!h]
   \begin{center}
@@ -209,9 +229,9 @@ class Canvas(object):
 
     def html(self, output_folder, output_folder_img, format="png"):
         """docstring for latex"""
-        filepath = output_folder_img + self.title.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        filepath = output_folder_img + self.name.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + ".%s" % format
         self.save(filepath)
-        relative_dir = output_folder_img.replace(output_folder, "")  + self.title.replace(" ","_").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        relative_dir = output_folder_img.replace(output_folder, "")  + self.name.replace(" ","_").replace("#", "").replace("(","").replace(")","") + ".%s" % format
         output = r'''<p class="figure" id="%s"><img src="%s" alt="%s"/><small>%s</small></p>''' % (self.tex_ref(), relative_dir, self.title.replace("#", ""), self._caption)
         return output
     def report(self):

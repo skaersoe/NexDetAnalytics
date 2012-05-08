@@ -242,6 +242,7 @@ class FileCollection(object):
             tmpFilecollection = FileCollection()
             tmpFilecollection.verbose = self.verbose
             tmpFilecollection.tfileobjs = self.tfileobjs + other.tfileobjs
+            tmpFilecollection.tfilepaths = self.tfilepaths + other.tfilepaths
             return tmpFilecollection
         else:
             raise TypeError
