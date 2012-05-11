@@ -50,7 +50,14 @@ class Canvas(object):
         """docstring for drawAsStack"""
         self.tcanvas.cd(0)
         self.tstack.Draw("nostack")
-        
+    
+    def yrange(self, miny, maxy):
+        """docstring for yrange"""
+        self.content[0].th.GetYaxis().SetRangeUser(miny, maxy)
+
+    def xrange(self, minx, maxx):
+        """docstring for yrange"""
+        self.content[0].th.GetXaxis().SetRangeUser(minx, maxx)
         
     def logx(self):
         """docstring for logx"""
@@ -182,7 +189,7 @@ class Canvas(object):
         if len(self.content) == 1: # stack
             self.goption += "SAME"
             
-        self.tstack.Add(hist.th, goption)
+        # self.tstack.Add(hist.th, goption)
             
         self.update()
         
