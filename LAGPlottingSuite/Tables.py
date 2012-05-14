@@ -197,7 +197,7 @@ class CutflowTable(object):
             for m in self.samples:
                 # if self.default_list[i][m] is float:
                 try:
-                    string += "<td class='float'>%2.2f</td>" % self.default_list[i][m]  + "\n"
+                    string += "<td class='float'>%2.4f</td>" % self.default_list[i][m]  + "\n"
                 except:
                     string += "<td class='empty'>-</td>"+ "\n"
             

@@ -110,8 +110,14 @@ class Hist(object):
         if color:
             self.color = color
             
-        self.th.SetLineColor(self.color)
-        # fout.th.SetFillColor(c)
+        dark   = TColor.GetColorDark(self.color);
+        bright = TColor.GetColorBright(self.color);
+    
+        self.th.SetLineColor(bright)
+        self.th.SetMarkerColor(self.color)
+        self.th.SetFillColor(self.color)
+        self.th.SetFillStyle(3001)
+
         
         return self.th
         
@@ -121,6 +127,9 @@ class File(object):
         super(File, self).__init__()
         self.fileobj = fileobj
         self.parent_collection = parent
+        self.xsec = -1
+        self.kfactor = -1
+        self.title = self.name()
         
     def name(self):
         """docstring for name"""

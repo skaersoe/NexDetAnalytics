@@ -12,6 +12,7 @@ import string
 import subprocess
 from time import strftime, localtime
 import datetime
+import getpass
 
 class Colors:
     HEADER = '\033[95m'
@@ -120,7 +121,7 @@ class Report(object):
         
         if not self.path:
             self.path = "/tmp"
-            self.folder = 'lag_report_' + "_" + strftime("%a_%d_%b_%Y_%H_%M_%S", localtime()) + '_' + ''.join(random.choice(string.ascii_lowercase + string.digits) for x in range(10)) 
+            self.folder = 'lag_report_%s_' % getpass.getuser() + "_" + strftime("%a_%d_%b_%Y_%H_%M_%S", localtime()) 
             self.path = "/".join([self.path, self.folder])
         
         print Colors.Blue +"\nReport folder: %s"  % self.path + Colors.Color_Off
