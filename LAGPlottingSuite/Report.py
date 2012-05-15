@@ -187,15 +187,13 @@ class Report(object):
                     out.write(r"\newpage")
                 out.write(r"%s" % part.latex(output_folder, output_folder_img))
         
-        
-        
+                
             out.write(r'''
 %\bibliographystyle{plain}
 %\bibliography{}
 \end{document}
 ''')
 
-        
         # # Create PDF
         os.chdir( output_folder )
         retcode = subprocess.call(["pdflatex","-interaction=batchmode", filename])
