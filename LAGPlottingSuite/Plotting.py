@@ -1,6 +1,7 @@
 from ROOT import *
 from array import array
 import FileCollections
+
 def new_color(n=1):
     while True:
         yield n
