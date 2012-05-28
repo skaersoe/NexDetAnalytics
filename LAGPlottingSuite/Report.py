@@ -370,6 +370,10 @@ class Text(object):
         """docstring for __str)"""
         return self.p
         
+    def append(self, string):
+        """docstring for append"""
+        self.p += string
+        
     def plain_text(self, output_folder, output_folder_img):
         """docstring for plain_text"""
         return self.p
@@ -380,7 +384,7 @@ class Text(object):
         
     def html(self, output_folder, output_folder_img):
         """HTML output"""
-        return r'<p>%s</p>' % self.p
+        return r'<p>%s</p>' % self.p.replace(r"\\","<br/>\n")
     
 class Equation(Text):
     """docstring for Equation"""
@@ -433,6 +437,9 @@ class Section(object):
         if isinstance(content, Tables.CutflowTable):
             self.parts.append(content)
 
+        return self.parts[-1]
+        
+        
     def __str__(self):
         """docstring for __str__"""
         out = ["\n"]
@@ -490,7 +497,7 @@ class SubSection(Section):
     def html(self, output_folder, output_folder_img):
         """docstring for html"""
         out = ["\n"]
-        out.append(r'<h3 id="%s">%s</h3>' %( self.tex_ref(), self.title))
+        out.append(r'<h3 id="%s">%s</h3>' %( self.tex_ref(), self.title)) 
         for part in self.parts:
             out.append(part.html(output_folder, output_folder_img))
         return "\n".join(out)

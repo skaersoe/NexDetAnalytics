@@ -143,6 +143,11 @@ class CutflowTable(object):
         """docstring for tex_ref"""
         return r"tbl:%s" % self.title.replace(" ", "_").replace("$","")
         
+    def save_file(self, filename):
+        """docstring for save_file"""
+        with open(filename, "w") as f:
+            f.write(self.latex("", ""))
+            
     def latex(self, output_folder, output_folder_img, format="pdf"):
         """docstring for tabular"""
         string = ""

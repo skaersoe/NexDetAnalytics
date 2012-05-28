@@ -7,6 +7,17 @@ def new_color(n=1):
         yield n
         n += 1
         
+
+def text(string, x = 0.8, y = 8.8, size = 0.05, color = 1, positioning = 32):
+    """Return a TLatex string obj"""
+    l = TLatex()
+
+    l.SetTextAlign(positioning); # see page 130 in the user guide
+    l.SetTextSize(size); #
+    l.SetNDC();
+    l.SetTextColor(color);
+    l.DrawLatex(x,y,string);
+    
     
 class Canvas(object):
     """A TCanvas with a few automatic features, such as legend"""
