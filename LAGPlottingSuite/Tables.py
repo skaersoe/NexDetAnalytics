@@ -1,3 +1,25 @@
+'''
+LaTeX Tables
+
+
+from LAGPlottingSuite.Tables import CutflowTable
+
+mytable = CutflowTable("unique_tag","caption string")
+mytable.add("row caption","column caption","value")
+mytable.save_file("table.tex")
+
+
+
+
+'''
+
+
+
+
+stringtemplate = '''
+%s\n
+%s\n
+'''
 latextemplate = r"""
 \begin{table}[h!]
     \centering
@@ -119,25 +141,26 @@ class CutflowTable(object):
     def __str__(self):
         """docstring for __str__"""
         string = ""
+        length = 0
         k = 0
-
         for i in self.cuts:
             k += 1
-            if k == 1: string+= len(self.samples[k])*" " + "|"+"|\t".join((m for m in self.samples)) + "\n"
+            if k == 1: 
+                string+= "\t| "+"\t | ".join((m for m in self.samples)) + "\n"
             
-            string+= "%s |"%i
             
+            length = len(self.samples)
+            
+            string+= "%s\t" % i
             for m in self.samples:
                 try:
-                    string += "\t%s|" % self.default_list[i][m]
+                    string += "\t | %s" % self.default_list[i][m]
                 except:
-                    string += "\t|" 
-            string += '\n'
+                    string += "\t  |" 
+            string +=  "\n"
 
-        
-        string += "\n\tTable caption: %s\n" % self.caption
-        
-        return string
+        return stringtemplate % (string, self.caption)
+
             
     def tex_ref(self):
         """docstring for tex_ref"""
@@ -168,9 +191,6 @@ class CutflowTable(object):
                 except:
                     string += "\t  &" 
             string +=  r"\\" + "\n"
-                
-                
-            # string+= "%s\t& "%i+ "\t & ".join(("$"+str(self.default_list[i][m])+"$" for m in self.samples)) + " \\\\ \n"
 
         return latextemplate % (min(1,length*0.3), length * "c", string, self.caption, self.tex_ref())
         
@@ -260,26 +280,5 @@ class TableTests(unittest.TestCase):
 
         
         
-
-
 if __name__ == '__main__':
-    unittest.main()# c = CutflowTable()
-# 
-# c.add("cut1", "data", 12)
-# c.add("cut2", "data", 5)
-# c.add("cut3", "data", 1)
-# 
-# c.add("cut1", "bg", 12)
-# c.add("cut2", "bg", 5)
-# c.add("cut3", "bg", 1)
-# 
-# 
-# c.add("cut1", "signal1", 1322)
-# c.add("cut2", "signal1", 523)
-# c.add("cut3", "signal1", 13)
-# 
-# c.add("cut1", "signal2", 1322)
-# c.add("cut2", "signal2", 523)
-# c.add("cut3", "signal2", 13)
-# 
-# print c.tabular()
+    unittest.main()
