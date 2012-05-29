@@ -8,6 +8,7 @@ def new_color(n=1):
         n += 1
         
 
+
 def text(string, x = 0.8, y = 8.8, size = 0.05, color = 1, positioning = 32):
     """Return a TLatex string obj"""
     l = TLatex()
