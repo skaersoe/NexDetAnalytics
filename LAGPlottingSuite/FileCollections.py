@@ -282,6 +282,16 @@ class FileCollection(object):
             names.append(f.fileobj.GetName())
         
         return "\n".join(names)
-    
-        
+
+
+    def ls(self):
+        """List content in common among the files"""
+        common = None
+        for f in self.tfileobjs: # iterate over all files
+            if not common: common = f.keys() # if its the first file, save the collection of histogram names
+            for key in common:                
+                if not key in f.keys():
+                    common.remove(key)
+                
+        return common
         
