@@ -37,6 +37,8 @@ class Canvas(object):
         self.title_g.SetNDC();
         self.title_g.SetTextColor(1);
         self._caption = r""
+        self.title_x = 0.82
+        self.title_y = 0.87
         
         self.content = []
         self.goption = goption
@@ -63,7 +65,12 @@ class Canvas(object):
         """docstring for drawAsStack"""
         self.tcanvas.cd(0)
         self.tstack.Draw("nostack")
-    
+
+    def title_position(self, x=0.82, y=0.87):
+        """docstring for title_position"""
+        self.title_x = x
+        self.title_y = y
+        
     def yrange(self, miny, maxy):
         """docstring for yrange"""
         self.content[0].th.GetYaxis().SetRangeUser(miny, maxy)
@@ -164,7 +171,7 @@ class Canvas(object):
         """docstring for update"""
         self.resize()
         self.tlegend.Draw()
-        self.title_g.DrawLatex(0.82,0.87, self.title);
+        self.title_g.DrawLatex(self.title_x, self.title_y, self.title);
         self.tcanvas.Update()
         
     
