@@ -171,7 +171,7 @@ class CutflowTable(object):
         with open(filename, "w") as f:
             f.write(self.latex("", ""))
             
-    def latex(self, output_folder, output_folder_img, format="pdf"):
+    def latex(self, output_folder, output_folder_img, timestamp="", format="pdf"):
         """docstring for tabular"""
         string = ""
         length = 0
@@ -194,10 +194,10 @@ class CutflowTable(object):
 
         return latextemplate % (min(1,length*0.3), length * "c", string, self.caption, self.tex_ref())
         
-    def plain_text(self, output_folder, output_folder_img, format="png"):
+    def plain_text(self, output_folder, output_folder_img, timestamp="", format="png"):
         return self.__str__()
         
-    def html(self, output_folder, output_folder_img, format="png"):
+    def html(self, output_folder, output_folder_img, timestamp="", format="png"):
         """docstring for html"""
         string = ""
         string_hdr = ""
