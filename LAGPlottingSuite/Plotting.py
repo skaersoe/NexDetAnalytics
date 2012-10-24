@@ -333,7 +333,7 @@ class LAGStyle(object):
         # use large fonts
         #Int_t font=72 # Helvetica italics
         font=42 # Helvetica
-        tsize=0.04
+        tsize=0.05
         lagStyle.SetTextFont(font)
 
         lagStyle.SetTextSize(tsize)

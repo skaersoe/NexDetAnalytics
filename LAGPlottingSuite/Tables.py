@@ -24,13 +24,26 @@ latextemplate = r"""
 \begin{table}[h!]
     \centering
     %%\resizebox{%s\textwidth}{!}{
-    \begin{tabular}{|l|%s|}
-    \hline
-    %s\hline
+    \begin{tabular}{%s}
+    \hline\noalign{\smallskip}
+    %s 
+    \noalign{\smallskip}\hline\noalign{\smallskip}
+    %s
+    \noalign{\smallskip}\hline\noalign{\smallskip}
     \end{tabular}%%}
     \caption{%s}
     \label{%s}
 \end{table}
+"""
+
+latextemplate_tabular = r"""
+\begin{tabular}{%s}
+\hline\noalign{\smallskip}
+%s 
+\noalign{\smallskip}\hline\noalign{\smallskip}
+%s
+\noalign{\smallskip}\hline\noalign{\smallskip}
+\end{tabular}
 """
 
 htmltemplate = r'''
@@ -51,6 +64,7 @@ htmltemplate = r'''
 import unittest
 import array
 import operator
+import sys
 
 class Table(object):
     """A 2D table that allows for keyed inputs on both axes"""
@@ -109,14 +123,35 @@ class Table(object):
 
 class CutflowTable(object):
     """docstring for CutflowTable"""
-    def __init__(self, title, caption="a new table"):
+    def __init__(self, title, caption="a new table", left_column_text=""):
         super(CutflowTable, self).__init__()
         self.default_list = dict()
         self.title = title
         self.caption = caption
         self.cuts = []
         self.samples = []
-        
+        self.left_column_text = left_column_text
+        self.extra_header = None
+        self.alignpattern = None
+
+    def xdim(self):
+        return len(self.samples)
+    def ydim(self):
+        return len(self.cuts)
+
+    def align_pattern(self, pattern):
+        self.alignpattern = pattern
+
+    def add_extra_header(self, col_text):
+        print len(col_text)
+        print len(self.samples)
+        if len(col_text)-1 == len(self.samples):
+            print "OK TO GO!"
+            self.extra_header = col_text
+        else:
+            print " prob"
+
+        # sys.exit(0)
 
     def add(self, cut, data, value):
         """docstring for add"""
@@ -146,7 +181,7 @@ class CutflowTable(object):
         for i in self.cuts:
             k += 1
             if k == 1: 
-                string+= "\t| "+"\t | ".join((m for m in self.samples)) + "\n"
+                string+= "%s\t| " % self.left_column_text +"\t | ".join((m for m in self.samples)) + "\n"
             
             
             length = len(self.samples)
@@ -166,22 +201,24 @@ class CutflowTable(object):
         """docstring for tex_ref"""
         return r"tbl:%s" % self.title.replace(" ", "_").replace("$","")
         
-    def save_file(self, filename):
+    def save_file(self, filename, tabular=False):
         """docstring for save_file"""
         with open(filename, "w") as f:
-            f.write(self.latex("", ""))
+            f.write(self.latex("", "", tabular_only=tabular))
             
-    def latex(self, output_folder, output_folder_img, format="pdf"):
+    def latex(self, output_folder, output_folder_img, format="pdf", tabular_only=False):
         """docstring for tabular"""
         string = ""
         length = 0
+        header = ""
         k = 0
         for i in self.cuts:
             k += 1
             if k == 1: 
-                string+= "\t& "+"\t & ".join((m for m in self.samples)) + r" \\ \hline" + "\n"
-            
-            
+                header+= "%s\t& " % self.left_column_text +"\t & ".join((m for m in self.samples)) + r" \\" + "\n"
+                if self.extra_header: header+= "\t & ".join((m for m in self.extra_header)) + r" \\" + "\n"
+                # header += "\hline\hline \n"
+
             length = len(self.samples)
             
             string+= "%s\t" % i
@@ -192,7 +229,17 @@ class CutflowTable(object):
                     string += "\t  &" 
             string +=  r"\\" + "\n"
 
-        return latextemplate % (min(1,length*0.3), length * "c", string, self.caption, self.tex_ref())
+
+        # user defined align pattern or default
+        if not self.alignpattern:
+            alignpattern = "|l|%s|" % (length * "c")
+        else:
+            alignpattern = self.alignpattern
+
+        if tabular_only:
+            return latextemplate_tabular % (alignpattern, header, string)
+    
+        return latextemplate % (min(1,length*0.3), alignpattern, header, string, self.caption, self.tex_ref())
         
     def plain_text(self, output_folder, output_folder_img, format="png"):
         return self.__str__()
@@ -212,7 +259,7 @@ class CutflowTable(object):
             # sorted(samp, key=lambda x: )
             
             if k == 1: 
-                string_hdr+= "<td></td>"+" ".join(('<td>'+str(m)+'</td>' for m in self.samples)) + "\n"
+                string_hdr+= "<td>%s</td>" % self.left_column_text + " ".join(('<td>'+str(m)+'</td>' for m in self.samples)) + "\n"
             # string+= "%s\t& "%i+ "\t & ".join(("$"+str(self.default_list[i][m])+"$" for m in samp)) + " \\\\ \n"
             
             
