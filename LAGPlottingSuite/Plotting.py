@@ -226,11 +226,11 @@ class Canvas(object):
         """docstring for tex_ref"""
         return r"fig:%s" % self.title.replace(" ", "_").replace("#", "")
         
-    def plain_text(self, output_folder, output_folder_img, format="png"):
+    def plain_text(self, output_folder, output_folder_img, timestamp="", format="png"):
         """docstring for fname"""
-        filepath = output_folder_img + self.name.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        filepath = output_folder_img + self.name.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + timestamp + ".%s" % format
         self.save(filepath)
-        relative_dir = output_folder_img.replace(output_folder, "")  + self.name.replace(" ","_").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        relative_dir = output_folder_img.replace(output_folder, "")  + self.name.replace(" ","_").replace("#", "").replace("(","").replace(")","") + timestamp+ ".%s" % format
         
         return "figure: %s (%s)" % (self.title, relative_dir)
 
@@ -238,11 +238,11 @@ class Canvas(object):
         """docstring for __str__"""
         return "Figure: See the canvas named: '%s'." % self.title
         
-    def latex(self, output_folder, output_folder_img, format="pdf"):
+    def latex(self, output_folder, output_folder_img,  timestamp="", format="pdf"):
         """docstring for latex"""
-        filepath = output_folder_img + self.name.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        filepath = output_folder_img + self.name.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + timestamp + ".%s" % format
         self.save(filepath)
-        relative_dir = output_folder_img.replace(output_folder, "")  + self.name.replace(" ","_").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        relative_dir = output_folder_img.replace(output_folder, "")  + self.name.replace(" ","_").replace("#", "").replace("(","").replace(")","") + timestamp + ".%s" % format
         output = r'''
 \begin{figure}[!h]
   \begin{center}
@@ -254,11 +254,11 @@ class Canvas(object):
         ''' % (relative_dir, self.title.replace("#", ""), self._caption, self.tex_ref())
         return output
 
-    def html(self, output_folder, output_folder_img, format="png"):
+    def html(self, output_folder, output_folder_img,  timestamp="", format="png"):
         """docstring for latex"""
-        filepath = output_folder_img + self.name.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        filepath = output_folder_img + self.name.replace(" ","_").replace("#", "").replace("#", "").replace("(","").replace(")","") + timestamp+ ".%s" % format
         self.save(filepath)
-        relative_dir = output_folder_img.replace(output_folder, "")  + self.name.replace(" ","_").replace("#", "").replace("(","").replace(")","") + ".%s" % format
+        relative_dir = output_folder_img.replace(output_folder, "")  + self.name.replace(" ","_").replace("#", "").replace("(","").replace(")","") + timestamp + ".%s" % format
         output = r'''<p class="figure" id="%s"><img src="%s" alt="%s"/><small>%s</small></p>''' % (self.tex_ref(), relative_dir, self.title.replace("#", ""), self._caption)
         return output
     def report(self):

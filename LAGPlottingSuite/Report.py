@@ -104,6 +104,10 @@ class Colors:
         self.ENDC = ''
         
 
+def timestamp():
+    """docstring for timestamp"""
+    return strftime("_%a%d%b%Y%H%M%S", localtime())
+    
 class Report(object):
     """docstring for Report"""
     def __init__(self, title=u"An example report", author=u"Morten Dam Joergensen", rdate=datetime.date.today(), path=os.getcwd()):
@@ -114,6 +118,7 @@ class Report(object):
         self.sections = []
         self.path = path
 
+        self.timestamp = timestamp()
         if self.path:
             d = os.path.dirname(self.path)
             if not os.path.exists(d):
@@ -121,7 +126,7 @@ class Report(object):
         
         if not self.path:
             self.path = "/tmp"
-            self.folder = 'lag_report_%s_' % getpass.getuser() + "_" + strftime("%a_%d_%b_%Y_%H_%M_%S", localtime()) 
+            self.folder = 'lag_report_%s_' % getpass.getuser()  + self.timestamp
             self.path = "/".join([self.path, self.folder])
         
         print Colors.Blue +"\nReport folder: %s"  % self.path + Colors.Color_Off
@@ -185,7 +190,7 @@ class Report(object):
             for part in self.sections:
                 if part.new_page:
                     out.write(r"\newpage")
-                out.write(r"%s" % part.latex(output_folder, output_folder_img))
+                out.write(r"%s" % part.latex(output_folder, output_folder_img, self.timestamp))
         
                 
             out.write(r'''
@@ -196,10 +201,10 @@ class Report(object):
 
         # # Create PDF
         os.chdir( output_folder )
-        retcode = subprocess.call(["pdflatex","-interaction=batchmode", filename])
-        retcode = subprocess.call(["pdflatex","-interaction=batchmode", filename])
-        retcode = subprocess.call(["pdflatex","-interaction=batchmode", filename])
-        retcode = subprocess.call(["pdflatex","-interaction=batchmode", filename])
+        retcode = subprocess.call(["pdflatex","-interaction=batchmode", filename]) # One for the money
+        retcode = subprocess.call(["pdflatex","-interaction=batchmode", filename]) # Two for the show
+        retcode = subprocess.call(["pdflatex","-interaction=batchmode", filename]) # Three to get ready
+        retcode = subprocess.call(["pdflatex","-interaction=batchmode", filename]) # Now go, cat go!
 
         # 
         # # Remove LaTex debris
@@ -311,7 +316,7 @@ MathJax.Hub.Config({
             
 
             for part in self.sections:
-                out.write(r"%s" % part.html(output_folder, output_folder_img))
+                out.write(r"%s" % part.html(output_folder, output_folder_img, self.timestamp))
 
             out.write(r'''</div></body></html>''')
 
@@ -335,7 +340,7 @@ MathJax.Hub.Config({
             out.write(self.author + "\n")
             
             for part in self.sections:
-                out.write("\n%s" % part.plain_text(output_folder, output_folder_img))
+                out.write("\n%s" % part.plain_text(output_folder, output_folder_img, self.timestamp))
 
             
         print Colors.Blue +"Text report: %s"  % output_folder + "%s.txt" % self.title.replace(" ", "_") + Colors.Color_Off
@@ -374,15 +379,15 @@ class Text(object):
         """docstring for append"""
         self.p += string
         
-    def plain_text(self, output_folder, output_folder_img):
+    def plain_text(self, output_folder, output_folder_img, timestamp=""):
         """docstring for plain_text"""
         return self.p
         
-    def latex(self, output_folder, output_folder_img):
+    def latex(self, output_folder, output_folder_img, timestamp=""):
         """docstring for plain_text"""
         return "\n\n" + self.p + "\n"
         
-    def html(self, output_folder, output_folder_img):
+    def html(self, output_folder, output_folder_img, timestamp=""):
         """HTML output"""
         return r'<p>%s</p>' % self.p.replace(r"\\","<br/>\n")
     
@@ -448,29 +453,29 @@ class Section(object):
             out.append(str(part))
         return "\n".join(out)
         
-    def plain_text(self, output_folder, output_folder_img):
+    def plain_text(self, output_folder, output_folder_img, timestamp=""):
         """docstring for plain_text"""
         out = ["\n"]
         out.append(self.title)
         for part in self.parts:
-            out.append(part.plain_text(output_folder, output_folder_img))
+            out.append(part.plain_text(output_folder, output_folder_img, timestamp))
         return "\n".join(out)
 
-    def latex(self, output_folder, output_folder_img):
+    def latex(self, output_folder, output_folder_img, timestamp=""):
         """docstring for plain_text"""
         out = ["\n"]
         out.append(r"\section{%s}" %self.title)
         out.append(r"\label{%s}" % self.tex_ref())
         for part in self.parts:
-            out.append(part.latex(output_folder, output_folder_img))
+            out.append(part.latex(output_folder, output_folder_img, timestamp))
         return "\n".join(out)
         
-    def html(self, output_folder, output_folder_img):
+    def html(self, output_folder, output_folder_img, timestamp=""):
         """docstring for html"""
         out = ["\n"]
         out.append(r'<h2 id="%s">%s</h2>' %( self.tex_ref(), self.title))
         for part in self.parts:
-            out.append(part.html(output_folder, output_folder_img))
+            out.append(part.html(output_folder, output_folder_img, timestamp))
         return "\n".join(out)
 
 class SubSection(Section):
@@ -483,23 +488,23 @@ class SubSection(Section):
         return r"subsec:%s" % self.title.replace(" ", "_").replace("#", "")
 
         
-    def latex(self, output_folder, output_folder_img):
+    def latex(self, output_folder, output_folder_img, timestamp=""):
         """docstring for plain_text"""
         out = ["\n"]
         out.append(r"\subsection{%s}" %self.title)
         out.append(r"\label{%s}" % self.tex_ref())
         for part in self.parts:
-            out.append(part.latex(output_folder, output_folder_img))
+            out.append(part.latex(output_folder, output_folder_img, timestamp))
         return "\n".join(out)
         
         
         
-    def html(self, output_folder, output_folder_img):
+    def html(self, output_folder, output_folder_img, timestamp=""):
         """docstring for html"""
         out = ["\n"]
         out.append(r'<h3 id="%s">%s</h3>' %( self.tex_ref(), self.title)) 
         for part in self.parts:
-            out.append(part.html(output_folder, output_folder_img))
+            out.append(part.html(output_folder, output_folder_img, timestamp))
         return "\n".join(out)
 
 
